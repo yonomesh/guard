@@ -1,2 +1,2 @@
-# sg
+# Spider Guard
 Spider Guard
