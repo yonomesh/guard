@@ -1,0 +1,20 @@
+[[plugin]]
+tag = "wireguard"
+type = "proxy"
+fetch = "remote"
+repo = "https://xxx.com/xxx.git"
+repo_tag = "v1.2.2"
+
+[[plugin]]
+tag = "ssh"
+type = "proxy"
+fetch = "local"
+repo = "ssh"
+repo_tag = "v1.2.2"
+
+[[plugin]]
+tag = "http"
+type = "proxy"
+fetch = "local"
+repo = "http"
+repo_tag = "v1.0.0"
