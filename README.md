@@ -17,6 +17,9 @@ Sincerely thank the developers and maintainers of the following projects and lib
 - [the-tcpdump-group/libpcap](https://github.com/the-tcpdump-group/libpcap) the LIBpcap interface to various kernel packet capture mechanism
 - [nmap/npcap](https://github.com/nmap/npcap) Nmap Project's Windows packet capture and transmission library
 - [colinnewell/pcap2har-go](https://github.com/colinnewell/pcap2har-go) Turn a pcap (tcpdump) file into a har (json) file.
+- [open-ch/ja3](https://github.com/open-ch/ja3) A high performance Go Implementation of the JA3 Client Fingerprinting Algorithm.
+- [FoxIO-LLC/ja4](https://github.com/FoxIO-LLC/ja4) JA4+ is a suite of network fingerprinting standards
+- [lqqyt2423/go-mitmproxy](https://github.com/lqqyt2423/go-mitmproxy) mitmproxy implemented with golang.
 - [miekg/dns](https://github.com/miekg/dns) DNS library in Go
 - [quic-go](https://github.com/quic-go/quic-go) A production-ready QUIC implementation in pure Go
 - [gorilla/websocket](https://github.com/gorilla/websocket) Package gorilla/websocket is a fast, well-tested and widely used WebSocket implementation for Go.
