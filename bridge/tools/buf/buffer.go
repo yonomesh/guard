@@ -53,19 +53,6 @@ func NewSize(size int) *Buffer {
 	}
 }
 
-func (b *Buffer) IsFull() bool {
-	return b.end-b.start == b.capacity
-}
-
-func (b *Buffer) IsEmpty() bool {
-	return b.end-b.start == 0
-}
-
-// FreeBytes
-func (b *Buffer) AvailableSpace() []byte {
-	return b.data[b.end:b.capacity]
-}
-
 func As(data []byte) *Buffer {
 	return &Buffer{
 		data:     data,
@@ -81,12 +68,41 @@ func With(data []byte) *Buffer {
 	}
 }
 
+func (b *Buffer) IsFull() bool {
+	return b.end-b.start == b.capacity
+}
+
+func (b *Buffer) IsEmpty() bool {
+	return b.end-b.start == 0
+}
+
+// FreeBytes
+func (b *Buffer) AvailableSpace() []byte {
+	return b.data[b.end:b.capacity]
+}
+
 func (b *Buffer) Byte(index int) byte {
 	return b.data[b.start+index]
 }
 
 func (b *Buffer) SetByte(index int, value byte) {
 	b.data[b.start+index] = value
+}
+
+func (b *Buffer) Bytes() []byte {
+	return b.data[b.start:b.end]
+}
+
+// PeekN returns a slice of the first n available bytes in the buffer.
+// fun (b *Buffer)To
+func (b *Buffer) PeekN(n int) []byte {
+	return b.data[b.start : b.start+n]
+}
+
+// PeekAfter returns a slice of the bytes starting after the first n available bytes.
+// fun (b *Buffer)From
+func (b *Buffer) PeekAfterN(n int) []byte {
+	return b.data[b.start+n : b.end]
 }
 
 // Extend reserves 'n' bytes at the end of the buffer and returns the writable slice.
@@ -107,6 +123,49 @@ func (b *Buffer) Shift(from int) {
 	if b.end < b.start {
 		b.end = b.start
 	}
+}
+
+func (b *Buffer) Resize(start, length int) {
+	b.start = start
+	b.end = b.start + length
+}
+
+// 剩余容量是否足够插入 n byte
+func (b *Buffer) HasSpace(n int) bool {
+	if b.end-b.start+n > b.capacity {
+		return false
+		// panic(F.ToString("buffer overflow: capacity is ", b.capacity, ", but need ", n))
+	}
+	return true
+}
+
+// Deprecated: The Reset modifies the capacity, which is not recommended.
+func (b *Buffer) Reset() {
+	b.start = 0
+	b.end = 0
+	b.capacity = len(b.data)
+}
+
+// Increment Reference Count
+func (b *Buffer) IncRef() {
+	b.refs.Add(1)
+}
+
+// Decrement Reference Count
+func (b *Buffer) DecRef() {
+	b.refs.Add(-1)
+}
+
+// Maybe it can be renamed to Recycle()
+func (b *Buffer) Release() {
+	if b == nil || !b.managed {
+		return
+	}
+	if b.refs.Load() > 0 {
+		return
+	}
+	tools.Must(Put(b.data))
+	*b = Buffer{}
 }
 
 func (b *Buffer) Truncate(to int) {
@@ -134,6 +193,12 @@ func (b *Buffer) Write(data []byte) (n int, err error) {
 	n = copy(b.data[b.end:b.capacity], data)
 	b.end += n
 	return
+}
+
+// WriteTo writes all currently available data in the buffer to the writer w.
+func (b *Buffer) WriteTo(w io.Writer) (int64, error) {
+	n, err := w.Write(b.Bytes())
+	return int64(n), err
 }
 
 func (b *Buffer) WriteRandom(size int) []byte {

@@ -23,6 +23,7 @@ profile.cov
 refs.md
 prompt
 todo
+devdoc
 
 # Go workspace file
 go.work
