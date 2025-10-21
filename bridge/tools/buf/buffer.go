@@ -113,6 +113,14 @@ func (b *Buffer) Truncate(to int) {
 	b.end = b.start + to
 }
 
+func (b *Buffer) ExtendHeader(n int) []byte {
+	if b.start < n {
+		panic(F.ToString("buffer overflow: capacity ", b.capacity, ",start", b.start, ", need", n))
+	}
+	b.start -= n
+	return b.data[b.start : b.start+n]
+}
+
 // n 写入多少 byte
 func (b *Buffer) Write(data []byte) (n int, err error) {
 	if len(data) == 0 {
@@ -126,14 +134,6 @@ func (b *Buffer) Write(data []byte) (n int, err error) {
 	n = copy(b.data[b.end:b.capacity], data)
 	b.end += n
 	return
-}
-
-func (b *Buffer) ExtendHeader(n int) []byte {
-	if b.start < n {
-		panic(F.ToString("buffer overflow: capacity ", b.capacity, ",start", b.start, ", need", n))
-	}
-	b.start -= n
-	return b.data[b.start : b.start+n]
 }
 
 func (b *Buffer) WriteRandom(size int) []byte {
@@ -185,8 +185,15 @@ func (b *Buffer) WriteZeroN(n int) error {
 	return nil
 }
 
-func (b *Buffer) Read() {
+// Read reads up to len(p) bytes from the Buffer into p.
+func (b *Buffer) Read(p []byte) (n int, err error) {
+	if b.IsEmpty() {
+		return 0, io.EOF
+	}
 
+	n = copy(p, b.data[b.start:b.end])
+	b.start += n
+	return
 }
 
 // read data from an io.Reader directly into the available free space of the Buffer
