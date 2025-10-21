@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync/atomic"
 
+	"guard/bridge/common/debug"
 	E "guard/bridge/common/errors"
 	"guard/bridge/tools"
 	F "guard/bridge/tools/format"
@@ -68,6 +69,18 @@ func With(data []byte) *Buffer {
 	}
 }
 
+func (b *Buffer) Start() int {
+	return b.start
+}
+
+func (b *Buffer) DataLen() int {
+	return b.end - b.start
+}
+
+func (b *Buffer) Cap() int {
+	return b.capacity
+}
+
 func (b *Buffer) IsFull() bool {
 	return b.end-b.start == b.capacity
 }
@@ -93,14 +106,16 @@ func (b *Buffer) Bytes() []byte {
 	return b.data[b.start:b.end]
 }
 
+func (b *Buffer) Range(offset int, length int) []byte {
+	return b.data[b.start+offset : b.start+offset+length]
+}
+
 // PeekN returns a slice of the first n available bytes in the buffer.
-// fun (b *Buffer)To
 func (b *Buffer) PeekN(n int) []byte {
 	return b.data[b.start : b.start+n]
 }
 
 // PeekAfter returns a slice of the bytes starting after the first n available bytes.
-// fun (b *Buffer)From
 func (b *Buffer) PeekAfterN(n int) []byte {
 	return b.data[b.start+n : b.end]
 }
@@ -156,8 +171,7 @@ func (b *Buffer) DecRef() {
 	b.refs.Add(-1)
 }
 
-// Maybe it can be renamed to Recycle()
-func (b *Buffer) Release() {
+func (b *Buffer) Recycle() {
 	if b == nil || !b.managed {
 		return
 	}
@@ -178,6 +192,15 @@ func (b *Buffer) ExtendHeader(n int) []byte {
 	}
 	b.start -= n
 	return b.data[b.start : b.start+n]
+}
+
+func (b *Buffer) ToOwned() *Buffer {
+	n := NewSize(len(b.data))
+	copy(n.data[b.start:b.end], b.data[b.start:b.end])
+	n.start = b.start
+	n.end = b.end
+	n.capacity = b.capacity
+	return n
 }
 
 // n 写入多少 byte
@@ -339,4 +362,65 @@ func (b *Buffer) ReadBytes(n int) ([]byte, error) {
 	data := b.data[b.start : b.start+n]
 	b.start += n
 	return data, nil
+}
+
+// ================== Deprecated =======================
+
+// Deprecated: Leak() is weird, don't use it
+func (b *Buffer) Leak() {
+	if debug.Enable {
+		if b == nil || !b.managed {
+			return
+		}
+		refs := b.refs.Load()
+		if refs == 0 {
+			panic("leaking buffer")
+		} else {
+			panic(F.ToString("leaking buffer with ", refs, " references"))
+		}
+	} else {
+		b.Release()
+	}
+}
+
+// Deprecated: the name is bad, use Recycle()
+func (b *Buffer) Release() {
+	if b == nil || !b.managed {
+		return
+	}
+	if b.refs.Load() > 0 {
+		return
+	}
+	tools.Must(Put(b.data))
+	*b = Buffer{}
+}
+
+// Deprecated: the name is bad, use DataLen()
+func (b *Buffer) Len() int {
+	return b.end - b.start
+}
+
+// Deprecated: RawCap is wired, don't use it
+func (b *Buffer) RawCap() int {
+	return len(b.data)
+}
+
+// Deprecated: the name is bad, use PeekN instead
+func (b *Buffer) To(n int) []byte {
+	return b.data[b.start : b.start+n]
+}
+
+// Deprecated: the name is bad, use PeekAfterN instead
+func (b *Buffer) From(n int) []byte {
+	return b.data[b.start+n : b.end]
+}
+
+// Deprecated: the func is meaningless, please re-implementation
+func (b *Buffer) Index(start int) []byte {
+	return b.data[b.start+start : b.start+start]
+}
+
+// Deprecated: the func is bad, use AvailableSpace instead
+func (b *Buffer) FreeLen() int {
+	return b.capacity - b.end
 }
