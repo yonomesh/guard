@@ -1,23 +1,23 @@
 package bridge
 
 import (
-	"guard/bridge/matadata/ingress"
-	"guard/bridge/matadata/packet"
+	M "guard/bridge/common/matadata"
 	"net/netip"
 	"time"
 )
 
 type IngressContext struct {
 	Ingress     string
-	IngressType ingress.Type
-	IPVersion   packet.IPVersion
-	Network     packet.Network
-	Source      netip.AddrPort
-	Destination netip.AddrPort
+	IngressType string
+	// 这里还不清楚到底是什么
+	Network     string
+	IPVersion   uint8
+	Source      M.SocksAddr
+	Destination M.SocksAddr
 
 	// DPI
 	DPIContext        any
-	Protocol          packet.Protocol
+	Proto             string
 	Domain            string
 	DPIError          error
 	ClientFingerprint string
@@ -27,7 +27,7 @@ type IngressContext struct {
 
 	// cache
 	LastIngress              string
-	OriginDestination        netip.AddrPort
+	OriginDestination        M.SocksAddr
 	RouteOriginalDestination netip.Addr
 
 	UDPDisableDomainUnmapping bool
@@ -70,10 +70,4 @@ type IngressContext struct {
 
 	// // Deprecated: implement in rule action
 	// InboundDetour string
-}
-
-type IngressContext2 struct {
-
-	// cache
-
 }

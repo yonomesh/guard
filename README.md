@@ -21,6 +21,7 @@ Sincerely thank the developers and maintainers of the following projects and lib
 - [FoxIO-LLC/ja4](https://github.com/FoxIO-LLC/ja4) JA4+ is a suite of network fingerprinting standards
 - [lqqyt2423/go-mitmproxy](https://github.com/lqqyt2423/go-mitmproxy) mitmproxy implemented with golang.
 - [miekg/dns](https://github.com/miekg/dns) DNS library in Go
+- [AdGuardHome](https://github.com/AdguardTeam/AdGuardHome) Network-wide ads & trackers blocking DNS server
 - [quic-go](https://github.com/quic-go/quic-go) A production-ready QUIC implementation in pure Go
 - [gorilla/websocket](https://github.com/gorilla/websocket) Package gorilla/websocket is a fast, well-tested and widely used WebSocket implementation for Go.
 - [wireguard-go](https://git.zx2c4.com/wireguard-go) Go implementation of WireGuard
