@@ -33,5 +33,6 @@ Sincerely thank the developers and maintainers of the following projects and lib
 - [sagernet/sing-box](https://github.com/SagerNet/sing-box) The universal proxy platform
 - [vishvananda/netlink](https://github.com/vishvananda/netlink) Simple netlink library for go.
 - [uber-go/zap](https://github.com/uber-go/zap) Blazing fast, structured, leveled logging in Go.
+- [stretchr/testify](https://github.com/stretchr/testify) A toolkit with common assertions and mocks that plays nicely with the standard library
 - [etcd-io/bbolt](https://github.com/etcd-io/bbolt) An embedded key/value database for Go.
 - [beevik/ntp](https://github.com/beevik/ntp) a simple ntp client package for go
