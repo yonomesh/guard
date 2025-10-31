@@ -31,6 +31,8 @@ Sincerely thank the developers and maintainers of the following projects and lib
 - [openvpn3](https://github.com/OpenVPN/openvpn3) OpenVPN 3 is a C++ class library that implements the functionality of an OpenVPN client, and is protocol-compatible with the OpenVPN 2.x branch.
 - [sagernet/sing-tun](https://github.com/SagerNet/sing-tun) Simple transparent proxy library
 - [sagernet/sing-box](https://github.com/SagerNet/sing-box) The universal proxy platform
+- [xtls/xray-core](https://github.com/xtls/xray-core) A set of network tools.
+- [xtls/REALITY](https://github.com/XTLS/REALITY) A magical way to enhance TLS security.
 - [vishvananda/netlink](https://github.com/vishvananda/netlink) Simple netlink library for go.
 - [uber-go/zap](https://github.com/uber-go/zap) Blazing fast, structured, leveled logging in Go.
 - [stretchr/testify](https://github.com/stretchr/testify) A toolkit with common assertions and mocks that plays nicely with the standard library
