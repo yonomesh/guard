@@ -1,1 +1,1 @@
-package inopenvpn
+package openvpn

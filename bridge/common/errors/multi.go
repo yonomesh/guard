@@ -61,7 +61,9 @@ func Append(err error, other error, fn func(error) error) error {
 	return Errors(err, fn(other))
 }
 
-// 判断是某个错误类型
+// IsMulti checks if the given error (err) matches any error in the targetList.
+//
+// It returns true if err is one of the errors in targetList, otherwise false.
 func IsMulti(err error, targetList ...error) bool {
 	for _, target := range targetList {
 		if errors.Is(err, target) {

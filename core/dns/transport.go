@@ -8,7 +8,7 @@ import (
 	E "guard/bridge/common/errors"
 	"guard/bridge/common/logging"
 	N "guard/bridge/common/network"
-	"guard/modules/dns/server/unreal"
+	"guard/core/dns/server/unreal"
 
 	"github.com/miekg/dns"
 )

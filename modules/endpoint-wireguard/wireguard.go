@@ -1,1 +1,1 @@
-package outwireguard
+package wireguard

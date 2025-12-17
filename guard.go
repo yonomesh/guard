@@ -1,13 +1,17 @@
 package guard
 
-//go:generate go run directives_generate.go
-//go:generate go run owners_generate.go
+type Config struct {
+	Logging *Logging
+}
 
-// import (
-// 	_ "github.com/coredns/coredns/core/plugin" // Plug in CoreDNS.
-// 	"github.com/coredns/coredns/coremain"
-// )
+// App is a thing that Guard Runs
+type App interface {
+	Start()
+	Stop()
+}
 
-// func main() {
-// 	coremain.Run()
-// }
+var CustomVersion string = "v0.0.0"
+
+func Version() (simple, full string) {
+	return "v0.0.1", "v0.0.1"
+}

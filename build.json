@@ -1,3 +1,11 @@
 {
-    "author":""
+    "guard_tag": "v1.0.0",
+    "guard_commit": "",
+    "module": [
+        {
+            "repo": "",
+            "tag": "",
+            "commit": ""
+        }
+    ]
 }

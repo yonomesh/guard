@@ -1,4 +1,4 @@
-package cmd
+package guardcmd
 
 // Various Guard constants.
 const (

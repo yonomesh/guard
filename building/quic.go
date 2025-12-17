@@ -1,5 +1,5 @@
 //go:build with_quic
 
-package build
+package building
 
 const WithQUIC = true

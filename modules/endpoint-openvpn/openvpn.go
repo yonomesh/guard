@@ -1,1 +1,1 @@
-package outopenvpn
+package openvpn

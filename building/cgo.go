@@ -1,5 +1,5 @@
 //go:build cgo
 
-package build
+package building
 
 const CGO_ENABLED = true

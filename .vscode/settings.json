@@ -4,6 +4,7 @@
     },
     "editor.renderWhitespace": "boundary",
     "editor.cursorSmoothCaretAnimation": "on",
+    "editor.wordWrap": "on",
     "indentRainbow.indicatorStyle": "light",
     "indentRainbow.lightIndicatorStyleLineWidth": 1,
     "indentRainbow.colors": [

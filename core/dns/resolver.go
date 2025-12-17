@@ -13,7 +13,7 @@ import (
 	"guard/bridge/tools"
 	"guard/bridge/tools/freelru"
 	"guard/bridge/tools/maphash"
-	"guard/modules/dns/server/unreal"
+	"guard/core/dns/server/unreal"
 
 	"github.com/miekg/dns"
 )
