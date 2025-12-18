@@ -6,8 +6,9 @@ build:
 clean:
 	- rm -rf build/*
 
-fmt:
-	gofmt -w .
+lint:
+	- gofmt -w .
+	- golangci-lint run
 
 test:
 	- ./build/guard --version

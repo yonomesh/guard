@@ -10,7 +10,7 @@ import (
 	N "guard/bridge/common/network"
 	"guard/core/dns/server/unreal"
 
-	"github.com/miekg/dns"
+	"github.com/yonomesh/dns"
 )
 
 type Transport interface {

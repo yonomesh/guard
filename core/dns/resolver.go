@@ -15,7 +15,7 @@ import (
 	"guard/bridge/tools/maphash"
 	"guard/core/dns/server/unreal"
 
-	"github.com/miekg/dns"
+	"github.com/yonomesh/dns"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"guard"
 
-	"github.com/spf13/cobra"
+	"github.com/yonomesh/cobra"
 )
 
 var defaultFactory = newRootCmdFactory(func() *cobra.Command {
@@ -27,9 +27,29 @@ func init() {
 	})
 }
 
-func onlyVersionText() string {
-	_, f := guard.Version()
-	return f
+func GuardCmdToCobra(guardCmd Command) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   guardCmd.Name + " " + guardCmd.Usage,
+		Short: guardCmd.Short,
+		Long:  guardCmd.Long,
+	}
+
+	guardCmd.CobraFunc(cmd)
+
+	return cmd
+}
+
+// CommandFuncToCobraRunE wraps a Guard CommandFunc for use
+// in a cobra command's RunE field.
+func CommandFuncToCobraRunE(f CommandFunc) func(cmd *cobra.Command, _ []string) error {
+	return func(cmd *cobra.Command, _ []string) error {
+		status, err := f(Flags{cmd.Flags()}) // key point
+		if status > 1 {
+			cmd.SilenceErrors = true
+			return &exitError{ExitCode: status, Err: err}
+		}
+		return err
+	}
 }
 
 // exitError carries the exit code from CommandFunc to Main()
@@ -43,4 +63,9 @@ func (e *exitError) Error() string {
 		return fmt.Sprintf("exiting with code %d", e.ExitCode)
 	}
 	return e.Err.Error()
+}
+
+func onlyVersionText() string {
+	_, f := guard.Version()
+	return f
 }

@@ -16,8 +16,6 @@ func Main() {
 		os.Exit(guard.ExitCodeFailedStartup)
 	}
 
-	fmt.Println("Hello Guard!!!")
-
 	if err := defaultFactory.Build().Execute(); err != nil {
 		var exitError *exitError
 		if errors.As(err, &exitError) {

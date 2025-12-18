@@ -1,15 +1,14 @@
 package guardcmd
 
 import (
-	"flag"
 	"regexp"
 	"sync"
 
-	"github.com/spf13/cobra"
+	"github.com/yonomesh/cobra"
 )
 
 // Command represents a subcommand.
-// Name, Func, and Short are required.
+// Name, CobraFunc, and Short are required.
 type Command struct {
 	// The name of the subcommand. Must conform to the
 	// format described by the RegisterCommand() godoc.
@@ -20,7 +19,7 @@ type Command struct {
 	// the subcommand's flags and args. Use [] to indicate
 	// optional parameters and <> to enclose literal values
 	// intended to be replaced by the user. Do not prefix
-	// the string with "guard" or the name of the command
+	// the string with "caddy" or the name of the command
 	// since these will be prepended for you; only include
 	// the actual parameters for this command.
 	Usage string
@@ -35,23 +34,14 @@ type Command struct {
 	// being printed.
 	Long string
 
-	// Flags is the flagset for command.
-	// This is ignored if CobraFunc is set.
-	Flags *flag.FlagSet
-
-	// Func is a function that executes a subcommand using
-	// the parsed flags. It returns an exit code and any
-	// associated error.
-	// Required if CobraFunc is not set.
-	Func CommandFunc
-
-	// CobraFunc allows further configuration of the command
-	// via cobra's APIs. If this is set, then Func and Flags
-	// are ignored, with the assumption that they are set in
-	// this function. A caddycmd.WrapCommandFuncForCobra helper
-	// exists to simplify porting CommandFunc to Cobra's RunE.
+	// CobraFunc configures the command using Cobra APIs.
 	CobraFunc func(*cobra.Command)
 }
+
+var (
+	commandsMu sync.RWMutex
+	commands   = make(map[string]Command)
+)
 
 // Commands returns a list of commands initialised by
 // RegisterCommand
@@ -62,15 +52,42 @@ func Commands() map[string]Command {
 	return commands
 }
 
-var (
-	commandsMu sync.RWMutex
-	commands   = make(map[string]Command)
-)
-
 // CommandFunc is a command's function. It runs the
 // command and returns the proper exit code along with
 // any error that occurred.
 type CommandFunc func(Flags) (int, error)
+
+func init() {
+	RegisterCommand(Command{
+		Name:  "test",
+		Usage: "[--hello <text>]",
+		Short: "just test",
+		Long:  `Hello Yonomesh`,
+		CobraFunc: func(c *cobra.Command) {
+			c.Flags().StringP("hello", "", "", "test cmd hello")
+			c.RunE = CommandFuncToCobraRunE(cmdTest)
+		},
+	})
+
+	RegisterCommand(Command{
+		Name:  "start",
+		Usage: "[--config <path>] [--profile <path> ] [--watch] [--pidfile <file>]",
+		Short: "Starts the Guard process in the background and then returns",
+		Long: `
+Starts the Guard process, optionally bootstrapped with an initial profile and config file.
+This command unblocks after the server starts running or fails to run.
+
+On Windows, the spawned child process will remain attached to the terminal, so
+closing the window will forcefully stop Guard.
+`,
+		CobraFunc: func(c *cobra.Command) {
+			c.Flags().StringP("config", "c", "", "Configuration file")
+			c.Flags().StringP("profile", "p", "", "Profile")
+			c.Flags().StringP("pidfile", "", "", "Path of file to which to write process ID")
+			c.RunE = CommandFuncToCobraRunE(cmdStart)
+		},
+	})
+}
 
 // RegisterCommand registers the command cmd.
 // cmd.Name must be unique and conform to the
@@ -93,7 +110,7 @@ func RegisterCommand(cmd Command) {
 	if cmd.Name == "" {
 		panic("command name is required")
 	}
-	if cmd.Func == nil && cmd.CobraFunc == nil {
+	if cmd.CobraFunc == nil {
 		panic("command function missing")
 	}
 	if cmd.Short == "" {
@@ -105,9 +122,9 @@ func RegisterCommand(cmd Command) {
 	if !commandNameRegex.MatchString(cmd.Name) {
 		panic("invalid command name")
 	}
-	// defaultFactory.Use(func(rootCmd *cobra.Command) {
-	// 	rootCmd.AddCommand(caddyCmdToCobra(cmd))
-	// })
+	defaultFactory.Apply(func(rootCmd *cobra.Command) {
+		rootCmd.AddCommand(GuardCmdToCobra(cmd))
+	})
 	commands[cmd.Name] = cmd
 }
 

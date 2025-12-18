@@ -1,6 +1,6 @@
 package guardcmd
 
-import "github.com/spf13/cobra"
+import "github.com/yonomesh/cobra"
 
 type rootCmdFactory struct {
 	constructor func() *cobra.Command

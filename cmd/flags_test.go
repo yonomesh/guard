@@ -3,7 +3,7 @@ package guardcmd
 import (
 	"testing"
 
-	"github.com/spf13/pflag"
+	"github.com/yonomesh/pflag"
 )
 
 // func (f Flags) String(name string) string

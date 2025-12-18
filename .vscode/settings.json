@@ -2,6 +2,11 @@
     "gopls": {
         "ui.semanticTokens": true
     },
+    "go.lintTool": "golangci-lint",
+    "go.lintFlags": [
+        "--fast"
+    ],
+    "go.lintOnSave": "file",
     "editor.renderWhitespace": "boundary",
     "editor.cursorSmoothCaretAnimation": "on",
     "editor.wordWrap": "on",

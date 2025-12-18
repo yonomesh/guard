@@ -5,7 +5,7 @@ import (
 	"guard/bridge/common/logging"
 	"strings"
 
-	"github.com/miekg/dns"
+	"github.com/yonomesh/dns"
 )
 
 func LogCachedResponse(logging logging.ContextLogger, ctx context.Context, response *dns.Msg, ttl int) {
