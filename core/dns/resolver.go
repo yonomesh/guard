@@ -6,16 +6,16 @@ import (
 	"strings"
 	"time"
 
-	E "guard/bridge/common/errors"
-	"guard/bridge/common/logging"
-	M "guard/bridge/common/matadata"
-	"guard/bridge/common/task"
-	"guard/bridge/tools"
-	"guard/bridge/tools/freelru"
-	"guard/bridge/tools/maphash"
-	"guard/core/dns/server/unreal"
+	E "uni/bridge/common/errors"
+	"uni/bridge/common/logging"
+	M "uni/bridge/common/matadata"
+	"uni/bridge/common/task"
+	"uni/bridge/tools"
+	"uni/bridge/tools/freelru"
+	"uni/bridge/tools/maphash"
+	"uni/core/dns/server/unreal"
 
-	"github.com/yonomesh/dns"
+	"github.com/miekg/dns"
 )
 
 const (

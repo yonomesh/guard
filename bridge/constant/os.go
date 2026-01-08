@@ -1,6 +1,6 @@
 package constant
 
-import "guard/bridge/constant/goos"
+import "uni/bridge/constant/goos"
 
 const IsAndroid = goos.IsAndroid == 1
 

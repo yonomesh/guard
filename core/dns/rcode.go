@@ -1,6 +1,6 @@
 package dns
 
-import F "guard/bridge/tools/format"
+import F "uni/bridge/tools/format"
 
 type RCodeError uint16
 

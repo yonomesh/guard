@@ -1,4 +1,4 @@
-package guardcmd
+package unicmd
 
 // Various Guard constants.
 const (

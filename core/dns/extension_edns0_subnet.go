@@ -3,7 +3,7 @@ package dns
 import (
 	"net/netip"
 
-	"github.com/yonomesh/dns"
+	"github.com/miekg/dns"
 )
 
 type edns0SubnetTransportWrapper struct {

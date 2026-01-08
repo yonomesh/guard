@@ -5,12 +5,12 @@ import (
 	"net/netip"
 	"net/url"
 
-	E "guard/bridge/common/errors"
-	"guard/bridge/common/logging"
-	N "guard/bridge/common/network"
-	"guard/core/dns/server/unreal"
+	E "uni/bridge/common/errors"
+	"uni/bridge/common/logging"
+	N "uni/bridge/common/network"
+	"uni/core/dns/server/unreal"
 
-	"github.com/yonomesh/dns"
+	"github.com/miekg/dns"
 )
 
 type Transport interface {

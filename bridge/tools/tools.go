@@ -2,11 +2,12 @@ package tools
 
 import (
 	"context"
-	"guard/bridge/tools/x/constraints"
 	"runtime"
 	"slices"
 	"sort"
 	"unsafe"
+
+	"uni/bridge/tools/x/constraints"
 )
 
 // Any checks if any element in the array satisfies the given condition.

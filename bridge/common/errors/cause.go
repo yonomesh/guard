@@ -1,6 +1,6 @@
 package errors
 
-import F "guard/bridge/tools/format"
+import F "uni/bridge/tools/format"
 
 type causeError struct {
 	message string

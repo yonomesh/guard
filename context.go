@@ -1,4 +1,4 @@
-package guard
+package uni
 
 import "context"
 
@@ -9,4 +9,8 @@ type Context struct {
 	ancestry        []Module
 	cleanupFunces   []func()
 	exitFuncs       []func(context.Context)
+}
+
+type eventEmitter interface {
+	Emit(ctx Context, eventName string, data map[string]any) Event
 }

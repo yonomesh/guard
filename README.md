@@ -2,6 +2,8 @@
 
 don't use, it is an experimental firewall
 
+A Flexible Module Framework Inspired by Caddy's Plugin System
+
 # Acknowledgements
 
 Sincerely thank the developers and maintainers of the following projects and libraries:

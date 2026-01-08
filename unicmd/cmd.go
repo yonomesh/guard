@@ -1,10 +1,10 @@
-package guardcmd
+package unicmd
 
 import (
 	"regexp"
 	"sync"
 
-	"github.com/yonomesh/cobra"
+	"github.com/spf13/cobra"
 )
 
 // Command represents a subcommand.
@@ -123,7 +123,7 @@ func RegisterCommand(cmd Command) {
 		panic("invalid command name")
 	}
 	defaultFactory.Apply(func(rootCmd *cobra.Command) {
-		rootCmd.AddCommand(GuardCmdToCobra(cmd))
+		rootCmd.AddCommand(UniCmdToCobra(cmd))
 	})
 	commands[cmd.Name] = cmd
 }

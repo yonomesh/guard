@@ -1,4 +1,4 @@
-package guard
+package uni
 
 import (
 	"fmt"
@@ -37,3 +37,6 @@ func ParseDuration(s string) (time.Duration, error) {
 	}
 	return time.ParseDuration(s)
 }
+
+// TODO func setResourceLimits(logger *zap.Logger) func()
+//    => func SetResourceLimits(logger *zap.Logger) func()

@@ -1,10 +1,10 @@
-package guardcmd
+package unicmd
 
 import (
 	"fmt"
-	"guard"
+	"uni"
 
-	"github.com/yonomesh/cobra"
+	"github.com/spf13/cobra"
 )
 
 var defaultFactory = newRootCmdFactory(func() *cobra.Command {
@@ -27,19 +27,19 @@ func init() {
 	})
 }
 
-func GuardCmdToCobra(guardCmd Command) *cobra.Command {
+func UniCmdToCobra(uniCmd Command) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   guardCmd.Name + " " + guardCmd.Usage,
-		Short: guardCmd.Short,
-		Long:  guardCmd.Long,
+		Use:   uniCmd.Name + " " + uniCmd.Usage,
+		Short: uniCmd.Short,
+		Long:  uniCmd.Long,
 	}
 
-	guardCmd.CobraFunc(cmd)
+	uniCmd.CobraFunc(cmd)
 
 	return cmd
 }
 
-// CommandFuncToCobraRunE wraps a Guard CommandFunc for use
+// CommandFuncToCobraRunE wraps a Uni CommandFunc for use
 // in a cobra command's RunE field.
 func CommandFuncToCobraRunE(f CommandFunc) func(cmd *cobra.Command, _ []string) error {
 	return func(cmd *cobra.Command, _ []string) error {
@@ -66,6 +66,6 @@ func (e *exitError) Error() string {
 }
 
 func onlyVersionText() string {
-	_, f := guard.Version()
+	_, f := uni.Version()
 	return f
 }

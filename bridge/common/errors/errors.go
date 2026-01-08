@@ -8,8 +8,8 @@ import (
 	"os"
 	"syscall"
 
-	"guard/bridge/tools"
-	F "guard/bridge/tools/format"
+	"uni/bridge/tools"
+	F "uni/bridge/tools/format"
 )
 
 // New returns an error created from the given message arguments.

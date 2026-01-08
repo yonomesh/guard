@@ -1,11 +1,9 @@
 package main
 
-import (
-	guardcmd "guard/cmd"
-)
+import "uni/unicmd"
 
 // "guard/bridge/common/matadata"
 
 func main() {
-	guardcmd.Main()
+	unicmd.Main()
 }

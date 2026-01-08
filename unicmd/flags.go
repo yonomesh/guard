@@ -1,11 +1,14 @@
-package guardcmd
+package unicmd
 
 import (
-	"guard"
+	"flag"
 	"strconv"
+	"strings"
 	"time"
 
-	"github.com/yonomesh/pflag"
+	"uni"
+
+	"github.com/spf13/pflag"
 )
 
 // Flags wraps a FlagSet so that typed values
@@ -53,6 +56,23 @@ func (f Flags) Float64(name string) float64 {
 // is not a duration type. It panics if the flag is
 // not in the flag set.
 func (f Flags) Duration(name string) time.Duration {
-	val, _ := guard.ParseDuration(f.String(name))
+	val, _ := uni.ParseDuration(f.String(name))
 	return val
 }
+
+// TODO func loadEnvFromFile(envFile string) error
+// TODO func parseEnvFile(envInput io.Reader) (map[string]string, error)
+// TODO func printEnvironment()
+
+// StringSlice is a flag.Value that enables repeated use of a string flag.
+type StringSlice []string
+
+func (ss StringSlice) String() string { return "[" + strings.Join(ss, ", ") + "]" }
+
+func (ss *StringSlice) Set(value string) error {
+	*ss = append(*ss, value)
+	return nil
+}
+
+// Interface guard
+var _ flag.Value = (*StringSlice)(nil)

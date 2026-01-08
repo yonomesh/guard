@@ -1,12 +1,41 @@
-package guard
+package uni
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
+	"sync"
 	"time"
+
+	"uni/internal"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"golang.org/x/term"
 )
 
+// Logging facilitates logging within Kaze. The default log is
+// called "default" and you can customize it. You can also define
+// additional logs.
+//
+// By default, all logs at INFO level and higher are written to
+// standard error ("stderr" writer) in a human-readable format
+// ("console" encoder if stdout is an interactive terminal, "json"
+// encoder otherwise).
+//
+// All defined logs accept all log entries by default, but you
+// can filter by level and module/logger names. A logger's name
+// is the same as the module's name, but a module may append to
+// logger names for more specificity. For example, you can
+// filter logs emitted only by HTTP handlers using the name
+// "http.handlers", because all HTTP handler module names have
+// that prefix.
+//
+// Caddy logs (except the sink) are zero-allocation, so they are
+// very high-performing in terms of memory and CPU time. Enabling
+// sampling can further increase throughput on extremely high-load
+// servers.
 type Logging struct {
 	// 非结构化的日志，如何记录
 	// Sink is the destination for all unstructured logs emitted
@@ -34,7 +63,7 @@ type Logging struct {
 // SinkLog configures the default Go standard library
 // global logger in the log package. This is necessary because
 // module dependencies which are not built specifically for
-// Caddy will use the standard logger. This is also known as
+// Kaze will use the standard logger. This is also known as
 // the "sink" logger.
 type SinkLog struct {
 	BaseLog
@@ -106,9 +135,33 @@ type BaseLog struct {
 
 	writerOpener WriterOpener
 	writer       io.WriteCloser
-	encoder      string //zapcore.Encoder
-	levelEnabler string //zapcore.LevelEnabler
-	core         string // zapcore.Core
+	encoder      zapcore.Encoder
+	levelEnabler zapcore.LevelEnabler
+	core         zapcore.Core
+}
+
+func (cl *BaseLog) buildCore() {
+	// logs which only discard their output don't need
+	// to perform encoding or any other processing steps
+	// at all, so just shortcut to a nop core instead
+	if _, ok := cl.writerOpener.(*DiscardWriter); ok {
+		cl.core = zapcore.NewNopCore()
+		return
+	}
+	c := zapcore.NewCore(cl.encoder, zapcore.AddSync(cl.writer), cl.levelEnabler)
+	if cl.Sampling != nil {
+		if cl.Sampling.Interval == 0 {
+			cl.Sampling.Interval = 1 * time.Second
+		}
+		if cl.Sampling.First == 0 {
+			cl.Sampling.First = 100
+		}
+		if cl.Sampling.Thereafter == 0 {
+			cl.Sampling.Thereafter = 100
+		}
+		c = zapcore.NewSamplerWithOptions(c, cl.Sampling.Interval, cl.Sampling.First, cl.Sampling.Thereafter)
+	}
+	cl.core = c
 }
 
 // WriterOpener is a module that can open a log writer.
@@ -128,13 +181,25 @@ type WriterOpener interface {
 	OpenWriter() (io.WriteCloser, error)
 }
 
+// IsWriterStandardStream returns true if the input is a
+// writer-opener to a standard stream (stdout, stderr).
+func IsWriterStandardStream(wo WriterOpener) bool {
+	switch wo.(type) {
+	case StdoutWriter, StderrWriter,
+		*StdoutWriter, *StderrWriter:
+		return true
+	}
+	return false
+}
+
 // LogSampling configures log entry sampling.
 type LogSampling struct {
 	// The window over which to conduct sampling.
 	Interval time.Duration `json:"interval,omitempty"`
 
-	// Log this many entries within a given level and
-	// message for each interval.
+	// Record the number of logs that are the first to
+	// arrive at the same level and message, at
+	// each sampling interval.
 	First int `json:"first,omitempty"`
 
 	// If more entries with the same level and message
@@ -150,7 +215,7 @@ type LogEntry struct {
 	Category string   `json:"category"` // Category or type of the log (e.g., user-action)
 	Tags     []string `json:"tags"`     // Tags related to the log
 	Msg      Msger    `json:"msg"`      // Msg content, implemented via the interface for customization
-	Extra    Extra    `json:"extra"`    // Ectra content, implemented via the interface for customization
+	Extra    Extra    `json:"extra"`    // Extra content, implemented via the interface for customization
 }
 
 type Msger interface {
@@ -160,3 +225,123 @@ type Msger interface {
 type Extra interface {
 	ExtraToString() (string, error)
 }
+
+type (
+	// StdoutWriter writes logs to standard out.
+	StdoutWriter struct{}
+
+	// StderrWriter writes logs to standard error.
+	StderrWriter struct{}
+
+	// DiscardWriter discards all writes.
+	DiscardWriter struct{}
+)
+
+func (StdoutWriter) String() string  { return "stdout" }
+func (StderrWriter) String() string  { return "stderr" }
+func (DiscardWriter) String() string { return "discard" }
+
+// WriterKey returns a unique key representing stdout.
+func (StdoutWriter) WriterKey() string { return "std:out" }
+
+// WriterKey returns a unique key representing stderr.
+func (StderrWriter) WriterKey() string { return "std:err" }
+
+// WriterKey returns a unique key representing discard.
+func (DiscardWriter) WriterKey() string { return "discard" }
+
+// OpenWriter returns os.Stdout that can't be closed.
+func (StdoutWriter) OpenWriter() (io.WriteCloser, error) {
+	return notClosable{os.Stdout}, nil
+}
+
+// OpenWriter returns io.Discard that can't be closed.
+func (StderrWriter) OpenWriter() (io.WriteCloser, error) {
+	return notClosable{os.Stderr}, nil
+}
+
+// OpenWriter returns io.Discard that can't be closed.
+func (DiscardWriter) OpenWriter() (io.WriteCloser, error) {
+	return notClosable{io.Discard}, nil
+}
+
+// notClosable is an io.WriteCloser that can't be closed.
+type notClosable struct{ io.Writer }
+
+func (fc notClosable) Close() error { return nil }
+
+type defaultCustomLog struct {
+	*CustomLog
+	logger *zap.Logger
+}
+
+// newDefaultProductionLog configures a custom log that is
+// intended for use by default if no other log is specified
+// in a config. It writes to stderr, uses the console encoder,
+// and enables INFO-level logs and higher.
+func newDefaultProductionLog() (*defaultCustomLog, error) {
+	cl := new(CustomLog)
+	cl.writerOpener = StderrWriter{}
+	var err error
+	cl.writer, err = cl.writerOpener.OpenWriter()
+	if err != nil {
+		return nil, err
+	}
+	cl.encoder = newDefaultProductionLogEncoder(cl.writerOpener)
+	cl.levelEnabler = zapcore.InfoLevel
+
+	cl.buildCore()
+
+	logger := zap.New(cl.core)
+
+	// capture logs from other libraries which
+	// may not be using zap logging directly
+	_ = zap.RedirectStdLog(logger)
+
+	return &defaultCustomLog{
+		CustomLog: cl,
+		logger:    logger,
+	}, nil
+}
+
+func newDefaultProductionLogEncoder(wo WriterOpener) zapcore.Encoder {
+	encCfg := zap.NewProductionEncoderConfig()
+	if IsWriterStandardStream(wo) && term.IsTerminal(int(os.Stderr.Fd())) {
+		encCfg.EncodeTime = func(t time.Time, pae zapcore.PrimitiveArrayEncoder) {
+			pae.AppendString(t.UTC().Format("2006/01/02 15:04:05.000"))
+		}
+		if coloringEnabled {
+			encCfg.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		}
+		return zapcore.NewConsoleEncoder(encCfg)
+	}
+	return zapcore.NewJSONEncoder(encCfg)
+}
+
+// Log returns the current default logger
+func Log() *zap.Logger {
+	defaultLoggerMu.RLock()
+	defer defaultLoggerMu.RUnlock()
+	return defaultLogger.logger
+}
+
+// BufferedLog sets the default logger to one that buffers
+// logs before a config is loaded.
+// Returns the buffered logger, the original default logger
+// (for flushing on errors), and the buffer core so that the
+// caller can flush the logs after the config is loaded or
+// fails to load.
+func BufferedLog() (*zap.Logger, *zap.Logger, *internal.LogBufferCore) {
+	defaultLoggerMu.Lock()
+	defer defaultLoggerMu.Unlock()
+	origLogger := defaultLogger.logger
+	bufferCore := internal.NewLogBufferCore(zap.InfoLevel)
+	defaultLogger.logger = zap.New(bufferCore)
+	return defaultLogger.logger, origLogger, bufferCore
+}
+
+var (
+	defaultLoggerMu  sync.RWMutex
+	defaultLogger, _ = newDefaultProductionLog()
+	coloringEnabled  = os.Getenv("NO_COLOR") == "" && os.Getenv("TERM") != "xterm-mono"
+)

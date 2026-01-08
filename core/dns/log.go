@@ -2,10 +2,11 @@ package dns
 
 import (
 	"context"
-	"guard/bridge/common/logging"
 	"strings"
 
-	"github.com/yonomesh/dns"
+	"uni/bridge/common/logging"
+
+	"github.com/miekg/dns"
 )
 
 func LogCachedResponse(logging logging.ContextLogger, ctx context.Context, response *dns.Msg, ttl int) {

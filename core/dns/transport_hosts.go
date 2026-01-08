@@ -3,7 +3,7 @@ package dns
 import (
 	"net/netip"
 
-	"github.com/yonomesh/dns"
+	"github.com/miekg/dns"
 )
 
 // FixedResponse creates a DNS response message with either A or AAAA records based on the provided addresses.

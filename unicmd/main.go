@@ -1,11 +1,11 @@
-package guardcmd
+package unicmd
 
 import (
 	"errors"
 	"fmt"
 	"os"
 
-	"guard"
+	"uni"
 )
 
 // Main implements the main function of the caddy command.
@@ -13,7 +13,7 @@ import (
 func Main() {
 	if len(os.Args) == 0 {
 		fmt.Println("[fatal] no arguments provided by OS; args[0] must be command")
-		os.Exit(guard.ExitCodeFailedStartup)
+		os.Exit(uni.ExitCodeFailedStartup)
 	}
 
 	if err := defaultFactory.Build().Execute(); err != nil {
