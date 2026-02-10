@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"uni/notify"
 
@@ -106,6 +107,12 @@ func changeConfig(method, path string, input []byte, ifMatchHeader string, force
 // Errors are logged along the way, and an appropriate exit
 // code is emitted.
 func exitProcess(ctx context.Context, logger *zap.Logger) {}
+
+// Duration can be an integer or a string. An integer is
+// interpreted as nanoseconds. If a string, it is a Go
+// time.Duration value such as `300ms`, `1.5h`, or `2h45m`;
+// valid units are `ns`, `us`/`µs`, `ms`, `s`, `m`, `h`, and `d`.
+type Duration time.Duration
 
 // TODO
 type Event struct{}

@@ -1,7 +1,7 @@
 .PHONY: build clean fmt test
 
 build:
-	- go build -o ./build/guard ./cmd/guard
+	- go build -o ./build/guard ./unicmd/uni
 
 clean:
 	- rm -rf build/*

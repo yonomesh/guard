@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-// Module is a type that is used as a Guard module. In
+// Module is a type that is used as a Uni module. In
 // addition to this interface, most modules will implement
 // some interface expected by their host module in order
 // to be useful. To learn which interface(s) to implement,
@@ -40,18 +40,18 @@ import (
 // 'any' to some other, more useful interface expected
 // by the host module.
 //
-// For example, HTTP handler modules are type-asserted as Guardhttp.MiddlewareHandler values.
+// For example, HTTP handler modules are type-asserted as unihttp.MiddlewareHandler values.
 //
 // 6) When a module's containing Context is canceled, if it is
 // a CleanerUpper, its Cleanup() method is called.
 type Module interface {
-	// his method indicates that the type is a Guard module.
+	// his method indicates that the type is a Uni module.
 	// The returned ModuleInfo must have both a name and a constructor function.
 	// This method must not have any side-effects.
-	GuardModule() ModuleInfo
+	UniModule() ModuleInfo
 }
 
-// ModuleInfo represents a registered Guard module.
+// ModuleInfo represents a registered Uni module.
 type ModuleInfo struct {
 	// ID is the "full name" of the module. It
 	// must be unique and properly namespaced.
@@ -69,7 +69,7 @@ type ModuleInfo struct {
 	New func() Module
 }
 
-// ModuleID is a string that uniquely identifies a Guard module. A
+// ModuleID is a string that uniquely identifies a Uni module. A
 // module ID is lightly structured. It consists of dot-separated
 // labels which form a simple hierarchy from left to right. The last
 // label is the module name, and the labels before that constitute
@@ -78,7 +78,7 @@ type ModuleInfo struct {
 // Thus, a module ID has the form: <namespace>.<name>
 //
 // An ID with no dot has the empty namespace, which is appropriate
-// for app modules (these are "top-level" modules that Guard core
+// for app modules (these are "top-level" modules that Uni core
 // loads and runs).
 //
 // Module IDs should be lowercase and use underscores (_) instead of
@@ -87,7 +87,7 @@ type ModuleInfo struct {
 // Examples of valid IDs:
 // - endpoint
 // - endpoint.https
-// - guard.logging.encoders.json
+// - uni.logging.encoders.json
 type ModuleID string
 
 // Namespace returns the namespace (or scope) portion of a module ID,
@@ -131,12 +131,12 @@ type ModuleMap map[string]json.RawMessage
 // incomplete or invalid, or if the module is already
 // registered.
 func RegisterModule(instance Module) {
-	mod := instance.GuardModule()
+	mod := instance.UniModule()
 
 	if mod.ID == "" {
 		panic("module ID missing")
 	}
-	if mod.ID == "guard" || mod.ID == "admin" {
+	if mod.ID == "uni" || mod.ID == "admin" {
 		panic(fmt.Sprintf("module ID '%s' is reserved", mod.ID))
 	}
 	if mod.New == nil {
@@ -172,7 +172,7 @@ func GetModule(name string) (ModuleInfo, error) {
 func GetModuleName(instance any) string {
 	var name string
 	if mod, ok := instance.(Module); ok {
-		name = mod.GuardModule().ID.Name()
+		name = mod.UniModule().ID.Name()
 	}
 	return name
 }
@@ -182,7 +182,7 @@ func GetModuleName(instance any) string {
 func GetModuleID(instance any) string {
 	var id string
 	if mod, ok := instance.(Module); ok {
-		id = string(mod.GuardModule().ID)
+		id = string(mod.UniModule().ID)
 	}
 	return id
 }
@@ -314,7 +314,7 @@ type CleanerUpper interface {
 	Cleanup() error
 }
 
-// ParseStructTag parses a guard struct tag into its keys and values.
+// ParseStructTag parses a uni struct tag into its keys and values.
 // It is very simple. The expected syntax is:
 // `caddy:"key1=val1 key2=val2 ..."`
 func ParseStructTag(tag string) (map[string]string, error) {

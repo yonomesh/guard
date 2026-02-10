@@ -15,6 +15,12 @@ import (
 	"golang.org/x/term"
 )
 
+func init() {
+	RegisterModule(StdoutWriter{})
+	RegisterModule(StderrWriter{})
+	RegisterModule(DiscardWriter{})
+}
+
 // Logging facilitates logging within Kaze. The default log is
 // called "default" and you can customize it. You can also define
 // additional logs.
@@ -236,6 +242,32 @@ type (
 	// DiscardWriter discards all writes.
 	DiscardWriter struct{}
 )
+
+// UniModule returns the Uni module information
+func (StdoutWriter) UniModule() ModuleInfo {
+	return ModuleInfo{
+		ID: "uni.logging.writers.stdout",
+		New: func() Module {
+			return new(StdoutWriter)
+		},
+	}
+}
+
+// UniModule returns the Uni module information
+func (StderrWriter) UniModule() ModuleInfo {
+	return ModuleInfo{
+		ID:  "uni.logging.writers.stderr",
+		New: func() Module { return new(StderrWriter) },
+	}
+}
+
+// UniModule returns the Uni module information
+func (DiscardWriter) UniModule() ModuleInfo {
+	return ModuleInfo{
+		ID:  "uni.logging.writers.discard",
+		New: func() Module { return new(DiscardWriter) },
+	}
+}
 
 func (StdoutWriter) String() string  { return "stdout" }
 func (StderrWriter) String() string  { return "stderr" }
